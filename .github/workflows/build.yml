@@ -16,7 +16,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo DEBIAN_FRONTEND=noninteractive apt-get install -y debootstrap syslinux genisoimage grub-pc-bin
+        sudo DEBIAN_FRONTEND=noninteractive apt-get install -y debootstrap syslinux genisoimage grub-pc-bin os-prober
 
     - name: Create minimal Linux environment
       run: |
@@ -32,13 +32,13 @@ jobs:
       run: |
         sudo grub-install --target=i386-pc --boot-directory=/minimal-linux/rootfs/boot /dev/sda
 
-    - name: Execute detect.sh script
-      run: |
-        sudo chroot minimal-linux/rootfs /bin/bash -c "/root/detect.sh"
-
     - name: Generate GRUB config file
       run: |
         sudo chroot minimal-linux/rootfs /bin/bash -c "update-grub"
+
+    - name: Execute detect.sh script
+      run: |
+        sudo chroot minimal-linux/rootfs /bin/bash -c "/root/detect.sh"
 
     - name: Generate ISO image
       run: |
