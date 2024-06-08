@@ -27,14 +27,9 @@ jobs:
       run: |
         sudo cp detect.sh minimal-linux/rootfs/root/
 
-    - name: Install GRUB dependencies
-      run: |
-        sudo chroot minimal-linux/rootfs /bin/bash -c "apt-get update"
-        sudo chroot minimal-linux/rootfs /bin/bash -c "apt-get install -y grub-pc-bin"
-
     - name: Install GRUB
       run: |
-        sudo chroot minimal-linux/rootfs /bin/bash -c "grub-install /dev/sda"
+        sudo grub-install --target=i386-pc --boot-directory=/minimal-linux/rootfs/boot /dev/sda
 
     - name: Execute detect.sh script
       run: |
