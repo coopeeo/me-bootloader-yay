@@ -1,0 +1,59 @@
+name: Build GRUB2
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y autoconf automake bison flex gcc make xorriso libssl-dev
+
+    - name: Clone GRUB2 source
+      run: |
+        git clone git://git.savannah.gnu.org/grub.git
+        cd grub
+        git checkout grub-2.06
+
+    - name: Build GRUB2
+      run: |
+        cd grub
+        ./bootstrap
+        ./configure
+        make
+        sudo make install
+
+    - name: Create ISO directory structure
+      run: |
+        mkdir -p iso/boot/grub
+        cp grub/grub-core/boot.img iso/boot/grub
+        cp /usr/local/lib/grub/i386-pc/*.mod iso/boot/grub
+
+    - name: Create GRUB config file
+      run: |
+        echo 'set default=0
+        set timeout=5
+        menuentry "My Custom Bootloader" {
+          insmod all_video
+          insmod part_gpt
+          insmod ext2
+          search --no-floppy --fs-uuid --set=root YOUR_PARTITION_UUID
+          linux /boot/vmlinuz root=UUID=YOUR_PARTITION_UUID ro quiet
+          initrd /boot/initrd.img
+        }' > iso/boot/grub/grub.cfg
+
+    - name: Create ISO image
+      run: |
+        grub-mkrescue -o grub2.iso iso
+
+    - name: Upload ISO artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: grub2.iso
+        path: grub2.iso
