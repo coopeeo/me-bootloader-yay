@@ -31,7 +31,7 @@ jobs:
     - name: Install GRUB and GRUB dependencies
       run: |
         sudo chroot minimal-linux/rootfs /bin/bash -c "apt-get update"
-        sudo chroot minimal-linux/rootfs /bin/bash -c "apt-get install -y grub-pc-bin os-prober"
+        sudo chroot minimal-linux/rootfs /bin/bash -c "apt-get install -y grub-pc-bin grub-common grub2-common"
 
     - name: Install GRUB
       run: |
