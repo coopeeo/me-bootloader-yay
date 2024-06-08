@@ -19,8 +19,7 @@ os-prober | while IFS= read -r line; do
     
 done
 
-# Set GRUB as the default bootloader
-sudo grub-set-default 0
-
-# Reboot the system to boot into GRUB
-sudo reboot
+# Add additional custom boot entries if needed
+# echo "menuentry 'Custom Entry' {" >> /boot/grub/grub.cfg
+# echo "    # Add boot options here" >> /boot/grub/grub.cfg
+# echo "}" >> /boot/grub/grub.cfg

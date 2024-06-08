@@ -16,65 +16,35 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo DEBIAN_FRONTEND=noninteractive apt-get install -y autoconf automake bison flex gcc make xorriso libssl-dev gettext autopoint os-prober grub2-common
-        echo "Dependencies installed"
+        sudo DEBIAN_FRONTEND=noninteractive apt-get install -y debootstrap syslinux genisoimage grub-pc-bin
 
-    - name: Clone GRUB2 source
+    - name: Create minimal Linux environment
       run: |
-        git clone git://git.savannah.gnu.org/grub.git
-        cd grub
-        git checkout grub-2.06
+        mkdir -p minimal-linux/rootfs
+        sudo debootstrap --variant=minbase stable minimal-linux/rootfs
 
-    - name: Build GRUB2
+    - name: Copy detect.sh script
       run: |
-        cd grub
-        ./bootstrap
-        ./configure
-        make
-        sudo make install
+        cp detect.sh minimal-linux/rootfs/root/
 
-    - name: Convert font to pf2 format
+    - name: Install GRUB
       run: |
-        # Replace the font file path with the actual path to your font file
-        grub-mkfont -s 24 -o noto-sans-regular-24.pf2 NotoSans-Regular.ttf
-        echo "Font converted to pf2 format"
+        sudo chroot minimal-linux/rootfs /bin/bash -c "grub-install /dev/sda"
 
-    - name: Create ISO directory structure
+    - name: Execute detect.sh script
       run: |
-        mkdir -p iso/boot/grub
-        cp grub/grub-core/boot.img iso/boot/grub
-        cp /usr/local/lib/grub/i386-pc/*.mod iso/boot/grub
-        # Include necessary libraries and binaries for the detect.sh script
-        cp /usr/bin/os-prober iso/boot/grub
-        # Add any additional libraries or binaries needed by the script
+        sudo chroot minimal-linux/rootfs /bin/bash -c "/root/detect.sh"
 
-    - name: Add custom GRUB theme
+    - name: Generate GRUB config file
       run: |
-        mkdir -p iso/boot/grub/themes/default-theme
-        cp theme.txt noto-sans-regular-24.pf2 iso/boot/grub/themes/default-theme/
-        cp icons/* iso/boot/grub/themes/default-theme/
-        echo 'GRUB_THEME="/boot/grub/themes/default-theme/theme.txt"' >> iso/boot/grub/grub.cfg
+        sudo chroot minimal-linux/rootfs /bin/bash -c "update-grub"
 
-    - name: Add detect.sh script
+    - name: Generate ISO image
       run: |
-        cp detect.sh iso/boot/grub
-
-    - name: Configure GRUB to execute detect.sh script
-      run: |
-        echo "exec tail -n +3 \$0" >> iso/boot/grub/grub.cfg
-        echo "# Detect installed operating systems and generate GRUB configuration dynamically" >> iso/boot/grub/grub.cfg
-        echo "source /boot/grub/detect.sh" >> iso/boot/grub/grub.cfg
-
-    - name: Add Reset config to reset on boot
-      run: |
-        cp iso/boot/grub/grub.cfg iso/boot/grub/grub.reset.cfg
-
-    - name: Create ISO image
-      run: |
-        grub-mkrescue -o grub2.iso iso
+        sudo mkisofs -o minimal-linux.iso -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table minimal-linux
 
     - name: Upload ISO artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
-        name: grub2.iso
-        path: grub2.iso
+        name: minimal-linux-iso
+        path: minimal-linux.iso
