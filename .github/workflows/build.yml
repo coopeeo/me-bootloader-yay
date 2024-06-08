@@ -27,10 +27,6 @@ jobs:
       run: |
         sudo cp detect.sh minimal-linux/rootfs/root/
 
-    - name: Execute detect.sh script
-      run: |
-        sudo chroot minimal-linux/rootfs /bin/bash -c "/root/detect.sh"
-
     - name: Install GRUB dependencies
       run: |
         sudo chroot minimal-linux/rootfs /bin/bash -c "apt-get update"
@@ -39,6 +35,10 @@ jobs:
     - name: Install GRUB
       run: |
         sudo chroot minimal-linux/rootfs /bin/bash -c "grub-install /dev/sda"
+
+    - name: Execute detect.sh script
+      run: |
+        sudo chroot minimal-linux/rootfs /bin/bash -c "/root/detect.sh"
 
     - name: Generate GRUB config file
       run: |
