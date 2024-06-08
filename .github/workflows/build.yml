@@ -14,11 +14,22 @@ jobs:
       run: |
         sudo apt-get update
         sudo DEBIAN_FRONTEND=noninteractive apt-get install -y autoconf automake bison flex gcc make xorriso libssl-dev gettext
+        echo "Dependencies installed"
 
     - name: Verify dependencies
       run: |
         which autopoint
         autopoint --version
+        echo "Autopoint version checked"
+
+    - name: Output environment variables
+      run: env
+
+    - name: Output PATH
+      run: echo $PATH
+
+    - name: List installed packages
+      run: dpkg -l
 
     - name: Clone GRUB2 source
       run: |
