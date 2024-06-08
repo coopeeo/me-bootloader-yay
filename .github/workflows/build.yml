@@ -25,7 +25,7 @@ jobs:
 
     - name: Copy detect.sh script
       run: |
-        cp detect.sh minimal-linux/rootfs/root/
+       sudo cp detect.sh minimal-linux/rootfs/root/
 
     - name: Install GRUB
       run: |
