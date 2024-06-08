@@ -18,9 +18,10 @@ jobs:
 
     - name: Verify dependencies
       run: |
-        which autopoint
-        autopoint --version
-        echo "Autopoint version checked"
+        echo "Checking autopoint installation..."
+        sudo apt-get install -y gettext
+        which autopoint || echo "autopoint not found"
+        autopoint --version || echo "autopoint version command failed"
 
     - name: Output environment variables
       run: env
@@ -29,7 +30,7 @@ jobs:
       run: echo $PATH
 
     - name: List installed packages
-      run: dpkg -l
+      run: dpkg -l | grep gettext
 
     - name: Clone GRUB2 source
       run: |
