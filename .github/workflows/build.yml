@@ -26,6 +26,7 @@ jobs:
     - name: Copy detect.sh script
       run: |
         sudo cp detect.sh minimal-linux/rootfs/root/
+        sudo chmod +x minimal-linux/rootfs/root/detect.sh  # Set executable permission
 
     - name: Install GRUB
       run: |
