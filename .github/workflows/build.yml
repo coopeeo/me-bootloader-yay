@@ -1,6 +1,9 @@
-name: Build GRUB2
+name: Build and Deploy GRUB Bootable USB
 
-on: [push]
+on:
+  push:
+    branches:
+      - main
 
 jobs:
   build:
@@ -13,24 +16,8 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo DEBIAN_FRONTEND=noninteractive apt-get install -y autoconf automake bison flex gcc make xorriso libssl-dev gettext autopoint
+        sudo DEBIAN_FRONTEND=noninteractive apt-get install -y autoconf automake bison flex gcc make xorriso libssl-dev gettext autopoint os-prober grub2-common
         echo "Dependencies installed"
-
-    - name: Verify dependencies
-      run: |
-        echo "Checking autopoint installation..."
-        sudo apt-get install -y gettext
-        which autopoint || echo "autopoint not found"
-        autopoint --version || echo "autopoint version command failed"
-
-    - name: Output environment variables
-      run: env
-
-    - name: Output PATH
-      run: echo $PATH
-
-    - name: List installed packages
-      run: dpkg -l | grep gettext
 
     - name: Clone GRUB2 source
       run: |
@@ -46,24 +33,41 @@ jobs:
         make
         sudo make install
 
+    - name: Convert font to pf2 format
+      run: |
+        # Replace the font file path with the actual path to your font file
+        grub-mkfont -s 24 -o noto-sans-regular-24.pf2 NotoSans-Regular.ttf
+        echo "Font converted to pf2 format"
+
     - name: Create ISO directory structure
       run: |
         mkdir -p iso/boot/grub
         cp grub/grub-core/boot.img iso/boot/grub
         cp /usr/local/lib/grub/i386-pc/*.mod iso/boot/grub
+        # Include necessary libraries and binaries for the detect.sh script
+        cp /usr/bin/os-prober iso/boot/grub
+        # Add any additional libraries or binaries needed by the script
 
-    - name: Create GRUB config file
+    - name: Add custom GRUB theme
       run: |
-        echo 'set default=0
-        set timeout=5
-        menuentry "My Custom Bootloader" {
-          insmod all_video
-          insmod part_gpt
-          insmod ext2
-          search --no-floppy --fs-uuid --set=root YOUR_PARTITION_UUID
-          linux /boot/vmlinuz root=UUID=YOUR_PARTITION_UUID ro quiet
-          initrd /boot/initrd.img
-        }' > iso/boot/grub/grub.cfg
+        mkdir -p iso/boot/grub/themes/default-theme
+        cp theme.txt noto-sans-regular-24.pf2 iso/boot/grub/themes/default-theme/
+        cp icons/* iso/boot/grub/themes/default-theme/
+        echo 'GRUB_THEME="/boot/grub/themes/default-theme/theme.txt"' >> iso/boot/grub/grub.cfg
+
+    - name: Add detect.sh script
+      run: |
+        cp detect.sh iso/boot/grub
+
+    - name: Configure GRUB to execute detect.sh script
+      run: |
+        echo "exec tail -n +3 \$0" >> iso/boot/grub/grub.cfg
+        echo "# Detect installed operating systems and generate GRUB configuration dynamically" >> iso/boot/grub/grub.cfg
+        echo "source /boot/grub/detect.sh" >> iso/boot/grub/grub.cfg
+
+    - name: Add Reset config to reset on boot
+      run: |
+        cp iso/boot/grub/grub.cfg iso/boot/grub/grub.reset.cfg
 
     - name: Create ISO image
       run: |

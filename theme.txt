@@ -1,0 +1,12 @@
+# GRUB theme configuration
+font = "noto-sans-regular-24.pf2"
+background_color = "color0"
+foreground_color = "color15"
+highlight_color = "color8"
+selected_background_color = "color8"
+selected_foreground_color = "color15"
+padding_x = 2
+padding_y = 2
+border_width = 0
+border_color = "color0"
+roundness = 10
