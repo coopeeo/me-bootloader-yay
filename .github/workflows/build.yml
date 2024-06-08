@@ -25,15 +25,20 @@ jobs:
 
     - name: Copy detect.sh script
       run: |
-       sudo cp detect.sh minimal-linux/rootfs/root/
-
-    - name: Install GRUB
-      run: |
-        sudo chroot minimal-linux/rootfs /bin/bash -c "grub-install /dev/sda"
+        sudo cp detect.sh minimal-linux/rootfs/root/
 
     - name: Execute detect.sh script
       run: |
         sudo chroot minimal-linux/rootfs /bin/bash -c "/root/detect.sh"
+
+    - name: Install GRUB dependencies
+      run: |
+        sudo chroot minimal-linux/rootfs /bin/bash -c "apt-get update"
+        sudo chroot minimal-linux/rootfs /bin/bash -c "apt-get install -y grub-pc-bin"
+
+    - name: Install GRUB
+      run: |
+        sudo chroot minimal-linux/rootfs /bin/bash -c "grub-install /dev/sda"
 
     - name: Generate GRUB config file
       run: |
@@ -44,7 +49,7 @@ jobs:
         sudo mkisofs -o minimal-linux.iso -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table minimal-linux
 
     - name: Upload ISO artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v2
       with:
         name: minimal-linux-iso
         path: minimal-linux.iso
