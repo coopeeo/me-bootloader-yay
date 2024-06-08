@@ -33,6 +33,10 @@ jobs:
         sudo chroot minimal-linux/rootfs /bin/bash -c "apt-get update"
         sudo chroot minimal-linux/rootfs /bin/bash -c "apt-get install -y grub-pc-bin grub-common grub2-common"
 
+    - name: Mount /dev directory within chroot environment
+      run: |
+        sudo chroot minimal-linux/rootfs /bin/bash -c "mount -t devtmpfs none /dev"
+
     - name: Install GRUB
       run: |
         sudo chroot minimal-linux/rootfs /bin/bash -c "grub-install --target=i386-pc --boot-directory=/boot /dev/sda"
