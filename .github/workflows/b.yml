@@ -47,7 +47,7 @@ jobs:
     - name: Configure Grub to boot into Debian
       run: |
         cd debian_env/boot/
-        mkdir grub
+        sudo mkdir grub
         cd ../../
         echo 'set default="0"
         set timeout="0"
