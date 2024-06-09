@@ -28,6 +28,10 @@ jobs:
         sudo cp detect.sh minimal-linux/rootfs/root/
         sudo chmod +x minimal-linux/rootfs/root/detect.sh  # Set executable permission
 
+    - name: Mount /dev directory in minimal Linux environment
+      run: |
+        sudo mount --bind /dev minimal-linux/rootfs/dev
+
     - name: Install GRUB and GRUB dependencies
       run: |
         sudo chroot minimal-linux/rootfs /bin/bash -c "apt-get update"
@@ -47,7 +51,7 @@ jobs:
 
     - name: Generate ISO image
       run: |
-        ls minimal-linux/boot/
+        ls minimal-linux/
         sudo mkisofs -o minimal-linux.iso -b minimal-linux/boot/isolinux/isolinux.bin -c minimal-linux/boot/isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table minimal-linux
 
     - name: Upload ISO artifact
