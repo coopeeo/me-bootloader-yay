@@ -32,12 +32,19 @@ jobs:
     - name: Download Kernel and Initrd
       run: |
         sudo chroot debian_env apt-get update
-        sudo chroot debian_env apt-get install -y linux-image-amd64 live-boot live-tools live-config
+        sudo chroot debian_env apt-get install -y linux-image-amd64 live-boot live-tools live-config os-prober
         KERNEL_VERSION=$(ls debian_env/boot/vmlinuz-* | sed 's|debian_env/boot/vmlinuz-||')
         INITRD_VERSION=$(ls debian_env/boot/initrd.img-* | sed 's|debian_env/boot/initrd.img-||')
         sudo mkdir -p debian_env/live
         sudo cp debian_env/boot/vmlinuz-$KERNEL_VERSION debian_env/live/vmlinuz
         sudo cp debian_env/boot/initrd.img-$INITRD_VERSION debian_env/live/initrd.img
+
+    - name: Add custom startup script
+      run: |
+        sudo mkdir -p debian_env/lib/live/config
+        echo "#!/bin/bash
+        echo 'Hello, World!' > /root/startup.log" | sudo tee debian_env/lib/live/config/0010-my-startup-script
+        sudo chmod +x debian_env/lib/live/config/0010-my-startup-script
 
     - name: Prepare live filesystem
       run: |
@@ -53,7 +60,7 @@ jobs:
           -o debian_based_linux.iso debian_env
 
     - name: Upload ISO artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: debian_based_linux_iso
         path: debian_based_linux.iso
