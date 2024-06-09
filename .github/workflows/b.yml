@@ -41,7 +41,7 @@ jobs:
 
     - name: Copy custom startup script into Debian environment
       run: |
-        sudo cp /detect.sh debian_env/root/custom_startup_script.sh
+        sudo cp detect.sh debian_env/root/custom_startup_script.sh
         sudo chmod +x debian_env/root/custom_startup_script.sh
 
     - name: Configure Grub to boot into Debian
