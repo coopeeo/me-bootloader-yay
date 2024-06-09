@@ -14,7 +14,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Install required tools
-      run: sudo apt-get update && sudo apt-get install -y debootstrap xorriso isolinux syslinux
+      run: sudo apt-get update && sudo apt-get install -y debootstrap xorriso isolinux syslinux squashfs-tools
 
     - name: Create Debian environment
       run: sudo debootstrap --variant=minbase stable debian_env http://deb.debian.org/debian
@@ -24,19 +24,24 @@ jobs:
         sudo mkdir -p debian_env/isolinux
         sudo cp /usr/lib/ISOLINUX/isolinux.bin debian_env/isolinux/
         sudo cp /usr/lib/syslinux/modules/bios/ldlinux.c32 debian_env/isolinux/
-        echo "default linux
-        label linux
+        echo "default live
+        label live
           kernel /vmlinuz
-          append initrd=/initrd.img boot=live" | sudo tee debian_env/isolinux/isolinux.cfg
+          append initrd=/initrd.img boot=live components" | sudo tee debian_env/isolinux/isolinux.cfg
 
     - name: Download Kernel and Initrd
       run: |
         sudo chroot debian_env apt-get update
-        sudo chroot debian_env apt-get install -y linux-image-amd64 live-boot
+        sudo chroot debian_env apt-get install -y linux-image-amd64 live-boot live-tools live-config
         KERNEL_VERSION=$(ls debian_env/boot/vmlinuz-* | sed 's|debian_env/boot/vmlinuz-||')
         INITRD_VERSION=$(ls debian_env/boot/initrd.img-* | sed 's|debian_env/boot/initrd.img-||')
         sudo cp debian_env/boot/vmlinuz-$KERNEL_VERSION debian_env/vmlinuz || true
         sudo cp debian_env/boot/initrd.img-$INITRD_VERSION debian_env/initrd.img || true
+
+    - name: Prepare live filesystem
+      run: |
+        sudo mkdir -p debian_env/live
+        sudo mksquashfs debian_env debian_env/live/filesystem.squashfs -e live/isolinux
 
     - name: Create ISO
       run: |
