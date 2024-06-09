@@ -34,8 +34,9 @@ jobs:
         sudo chroot debian_env apt-get update
         sudo chroot debian_env apt-get install -y linux-image-amd64 live-boot
         KERNEL_VERSION=$(ls debian_env/boot/vmlinuz-* | sed 's|debian_env/boot/vmlinuz-||')
-        sudo cp debian_env/boot/vmlinuz-$KERNEL_VERSION debian_env/vmlinuz
-        sudo cp debian_env/boot/initrd.img-$KERNEL_VERSION debian_env/initrd.img
+        INITRD_VERSION=$(ls debian_env/boot/initrd.img-* | sed 's|debian_env/boot/initrd.img-||')
+        sudo cp debian_env/boot/vmlinuz-$KERNEL_VERSION debian_env/vmlinuz || true
+        sudo cp debian_env/boot/initrd.img-$INITRD_VERSION debian_env/initrd.img || true
 
     - name: Create ISO
       run: |
