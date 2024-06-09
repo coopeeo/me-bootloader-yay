@@ -47,7 +47,7 @@ jobs:
 
     - name: Generate ISO image
       run: |
-        ls minimal-linux/
+        ls minimal-linux/rootfs
         sudo mkisofs -o minimal-linux.iso -b minimal-linux/boot/isolinux/isolinux.bin -c minimal-linux/boot/isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table minimal-linux
 
     - name: Upload ISO artifact
