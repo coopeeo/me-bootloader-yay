@@ -27,14 +27,15 @@ jobs:
         echo "default linux
         label linux
           kernel /vmlinuz
-          append initrd=/initrd.img root=/dev/sr0" | sudo tee debian_env/isolinux/isolinux.cfg
+          append initrd=/initrd.img boot=live" | sudo tee debian_env/isolinux/isolinux.cfg
 
     - name: Download Kernel and Initrd
       run: |
         sudo chroot debian_env apt-get update
         sudo chroot debian_env apt-get install -y linux-image-amd64 live-boot
-        sudo cp debian_env/boot/vmlinuz-* debian_env/vmlinuz
-        sudo cp debian_env/boot/initrd.img-* debian_env/initrd.img
+        KERNEL_VERSION=$(ls debian_env/boot/vmlinuz-* | sed 's|debian_env/boot/vmlinuz-||')
+        sudo cp debian_env/boot/vmlinuz-$KERNEL_VERSION debian_env/vmlinuz
+        sudo cp debian_env/boot/initrd.img-$KERNEL_VERSION debian_env/initrd.img
 
     - name: Create ISO
       run: |
