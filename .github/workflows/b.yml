@@ -1,0 +1,35 @@
+name: Build Debian-based Linux ISO
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Install required tools
+      run: sudo apt-get update && sudo apt-get install -y debootstrap xorriso
+
+    - name: Create Debian environment
+      run: sudo debootstrap --variant=minbase stable debian_env
+
+    - name: Customize Debian environment (optional)
+      run: |
+        # You can customize the Debian environment here if needed
+        # For example, you can chroot into the environment and install additional packages or configure settings
+
+    - name: Create ISO
+      run: |
+        sudo xorriso -as mkisofs -r -J -joliet-long -l -cache-inodes -isohybrid-mbr /usr/lib/ISOLINUX/isohdpfx.bin -partition_offset 16 -A "Debian-based Linux" -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -o debian_based_linux.iso debian_env
+
+    - name: Upload ISO artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: debian_based_linux_iso
+        path: debian_based_linux.iso
