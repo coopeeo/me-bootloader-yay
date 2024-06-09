@@ -24,10 +24,10 @@ jobs:
         sudo mkdir -p debian_env/isolinux
         sudo cp /usr/lib/ISOLINUX/isolinux.bin debian_env/isolinux/
         sudo cp /usr/lib/syslinux/modules/bios/ldlinux.c32 debian_env/isolinux/
-        echo "default live
-        label live
-          kernel /vmlinuz
-          append initrd=/initrd.img boot=live components" | sudo tee debian_env/isolinux/isolinux.cfg
+        echo "DEFAULT linux
+        LABEL linux
+          KERNEL /live/vmlinuz
+          APPEND initrd=/live/initrd.img boot=live components" | sudo tee debian_env/isolinux/isolinux.cfg
 
     - name: Download Kernel and Initrd
       run: |
@@ -35,12 +35,12 @@ jobs:
         sudo chroot debian_env apt-get install -y linux-image-amd64 live-boot live-tools live-config
         KERNEL_VERSION=$(ls debian_env/boot/vmlinuz-* | sed 's|debian_env/boot/vmlinuz-||')
         INITRD_VERSION=$(ls debian_env/boot/initrd.img-* | sed 's|debian_env/boot/initrd.img-||')
-        sudo cp debian_env/boot/vmlinuz-$KERNEL_VERSION debian_env/vmlinuz || true
-        sudo cp debian_env/boot/initrd.img-$INITRD_VERSION debian_env/initrd.img || true
+        sudo mkdir -p debian_env/live
+        sudo cp debian_env/boot/vmlinuz-$KERNEL_VERSION debian_env/live/vmlinuz
+        sudo cp debian_env/boot/initrd.img-$INITRD_VERSION debian_env/live/initrd.img
 
     - name: Prepare live filesystem
       run: |
-        sudo mkdir -p debian_env/live
         sudo mksquashfs debian_env debian_env/live/filesystem.squashfs -e live/isolinux
 
     - name: Create ISO
