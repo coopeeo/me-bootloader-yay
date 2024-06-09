@@ -26,6 +26,7 @@ jobs:
 
     - name: Create ISO
       run: |
+        ls /usr/lib/ISOLINUX/
         sudo xorriso -as mkisofs -r -J -joliet-long -l -isohybrid-mbr /usr/lib/ISOLINUX/isohdpfx.bin -partition_offset 16 -A "Debian-based Linux" -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -o debian_based_linux.iso debian_env
 
     - name: Upload ISO artifact
