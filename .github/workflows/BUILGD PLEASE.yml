@@ -74,7 +74,7 @@ jobs:
         grub-mkrescue -o grub2.iso iso
 
     - name: Upload ISO artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: grub2.iso
         path: grub2.iso
