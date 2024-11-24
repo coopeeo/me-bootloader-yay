@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Clear existing GRUB configuration
-#cat /boot/grub/grub.reset.cfg > /boot/grub/grub.cfg
+cat /boot/grub/grub.reset.cfg > /boot/grub/grub.cfg
 
 # Automatically detect installed operating systems and generate GRUB configuration entries
 os-prober | while IFS= read -r line; do
